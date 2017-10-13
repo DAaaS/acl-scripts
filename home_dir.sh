@@ -8,7 +8,8 @@
 FED_IDS="fedid1 fedid2 fedid3"
 
 TEST=true
-BASE_DIR="${1:-/test}"
+HOME_DIR_NOMACHINE="${1:-/test}"
+HOME_DIR_IDAAAS="${2:-/test2}"
 INFO_LOG="info.log"
 ERROR_LOG="error.log"
 ACL_LOG="acl.log"
@@ -18,9 +19,9 @@ rm -f $ERROR_LOG $INFO_LOG $ACL_LOG
 # loop over Federal IDs
 for fedid in $FED_IDS
 do
-    if [ ! -d "${BASE_DIR}/${fedid}" ]
+    if [ ! -d "${HOME_DIR_NOMACHINE}/${fedid}" ]
     then
-        echo "Home directory ${BASE_DIR}/${fedid} not found" | tee -a $ERROR_LOG
+        echo "Home directory ${HOME_DIR_NOMACHINE}/${fedid} not found" | tee -a $ERROR_LOG
         continue
     fi
 
@@ -30,14 +31,17 @@ do
     # check that Active Directory contains account matching the FEDID
     if [ $user_ret -eq 0 ]
     then
-        echo "Adding user permissions for '${fedid}' on directory '${BASE_DIR}/${fedid}'" | tee -a $INFO_LOG
+        echo "Adding user permissions for '${fedid}' on directory '${HOME_DIR_NOMACHINE}/${fedid}'" | tee -a $INFO_LOG
 
         # set user ACL rule as well as default ACL rule which means
         if [ "$TEST" = false ]
         then 
-            setfacl -Rm d:u:${fedid}:rwx,u:${fedid}:rwx ${BASE_DIR}/${fedid} >> $ACL_LOG
+            setfacl -Rm d:u:${fedid}:rwx,u:${fedid}:rwx ${HOME_DIR_NOMACHINE}/${fedid} >> $ACL_LOG
+
+            # add symlink to IDAaaS home directory pointing to their NoMachine home directory
+            ln -s ${HOME_DIR_NOMACHINE}/${fedid} ${HOME_DIR_IDAAAS}/${fedid}/NoMachine
         else
-            setfacl --test -Rm d:u:${fedid}:rwx,u:${fedid}:rwx ${BASE_DIR}/${fedid} >> $ACL_LOG
+            setfacl --test -Rm d:u:${fedid}:rwx,u:${fedid}:rwx ${HOME_DIR_NOMACHINE}/${fedid} >> $ACL_LOG
         fi
     elif [ $group_ret -eq 2 ]
     then
