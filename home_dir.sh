@@ -13,6 +13,8 @@ HOME_DIR_IDAAAS="${2:-/test2}"
 INFO_LOG="info.log"
 ERROR_LOG="error.log"
 ACL_LOG="acl.log"
+SYMLINK_PREFIX="/mnt/cephfs/home_dir_location/"
+
 
 rm -f $ERROR_LOG $INFO_LOG $ACL_LOG
 
@@ -39,7 +41,7 @@ do
             setfacl -Rm d:u:${fedid}:rwx,u:${fedid}:rwx ${HOME_DIR_NOMACHINE}/${fedid} >> $ACL_LOG
 
             # add symlink to IDAaaS home directory pointing to their NoMachine home directory
-            ln -s ${HOME_DIR_NOMACHINE}/${fedid} ${HOME_DIR_IDAAAS}/${fedid}/NoMachine
+            ln -s ${SYMLINK_PREFIX}/${fedid} ${HOME_DIR_IDAAAS}/${fedid}/NoMachine
         else
             setfacl --test -Rm d:u:${fedid}:rwx,u:${fedid}:rwx ${HOME_DIR_NOMACHINE}/${fedid} >> $ACL_LOG
         fi
