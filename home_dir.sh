@@ -5,16 +5,15 @@
 # current analysis cluster.
 #
 
-FED_IDS="fedid1 fedid2 fedid3"
 
 TEST=true
-HOME_DIR_NOMACHINE="${1:-/test}"
-HOME_DIR_IDAAAS="${2:-/test2}"
+HOME_DIR_NOMACHINE="${1:-/mnt/nomachine-homes}"
+HOME_DIR_IDAAAS="${2:-/mnt/idaaas-homes}"
 INFO_LOG="info.log"
 ERROR_LOG="error.log"
 ACL_LOG="acl.log"
-SYMLINK_PREFIX="/mnt/cephfs/home_dir_location/"
 
+FED_IDS=`ls -1 ${HOME_DIR_NOMACHINE}`
 
 rm -f $ERROR_LOG $INFO_LOG $ACL_LOG
 
@@ -38,14 +37,11 @@ do
         # set user ACL rule as well as default ACL rule which means
         if [ "$TEST" = false ]
         then 
-            setfacl -Rm d:u:${fedid}:rwx,u:${fedid}:rwx ${HOME_DIR_NOMACHINE}/${fedid} >> $ACL_LOG
-
-            # add symlink to IDAaaS home directory pointing to their NoMachine home directory
-            ln -s ${SYMLINK_PREFIX}/${fedid} ${HOME_DIR_IDAAAS}/${fedid}/NoMachine
+            setfacl -n -Rm d:u:${fedid}:rwx,u:${fedid}:rwx ${HOME_DIR_NOMACHINE}/${fedid} >> $ACL_LOG
         else
-            setfacl --test -Rm d:u:${fedid}:rwx,u:${fedid}:rwx ${HOME_DIR_NOMACHINE}/${fedid} >> $ACL_LOG
+            setfacl -n --test -Rm d:u:${fedid}:rwx,u:${fedid}:rwx ${HOME_DIR_NOMACHINE}/${fedid} >> $ACL_LOG
         fi
-    elif [ $group_ret -eq 2 ]
+    elif [ $user_ret -eq 2 ]
     then
         echo "User ${fedid} not found in Active Directory" | tee -a $ERROR_LOG
     else
