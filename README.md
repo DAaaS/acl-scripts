@@ -1,3 +1,6 @@
+# Archiving this repo on 21/07/2021
+
+
 # acl-scripts
 
 A series of scripts to apply ACL permissions to ISIS data.
